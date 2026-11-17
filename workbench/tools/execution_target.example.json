@@ -1,0 +1,9 @@
+{
+  "format_version": 1,
+  "target_id": "example-device",
+  "kind": "self_hosted",
+  "transport": "manual_terminal",
+  "expected_gpu": "NVIDIA GPU",
+  "gpu_selector": "0",
+  "notes": "This selects the GPU inside the target instance, not a remote GPU from the local workbench. Future self-hosted targets use the same version/run contract."
+}
