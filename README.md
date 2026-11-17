@@ -1,13 +1,17 @@
 # 视训工作台 · Vision Workbench
 
+> **项目声明：本项目仅用于学习和二次开发，基于 Ultralytics YOLO26 模型进行训练。**
+
+完整声明见 [NOTICE.md](NOTICE.md)。
+
 面向工业视觉缺陷检测的可视化训练与模型部署工作台，支持图片标注、类别分层划分、数据版本、模型持续迭代、SSH/WSL 训练环境校验及 TensorRT 产线导出。
 
-当前版本 **v0.36.0 / schema16**。Windows 桌面安装包内置控制端 Python，无需另装 Python、Git 或 Node.js。
+当前版本 **v0.36.1 / schema16**。Windows 桌面安装包内置控制端 Python，无需另装 Python、Git 或 Node.js。
 
 ## 普通用户下载安装
 
 1. 打开 [最新版本下载页](https://github.com/studyhard-zhang/vision-workbench/releases/latest)。
-2. 在 Assets 下载 `VisionWorkbench-Setup-0.36.0-x64.exe`，双击运行。
+2. 在 Assets 下载 `VisionWorkbench-Setup-0.36.1-x64.exe`，双击运行。
 3. 首次使用选择“创建新工作区”；已有数据选择“使用已有工作区”，指向包含 `platform.db` 的目录。
 4. 安装后从桌面或开始菜单打开“视训工作台”。
 

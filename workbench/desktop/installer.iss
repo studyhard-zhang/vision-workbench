@@ -1,5 +1,5 @@
 #ifndef AppVersion
-  #define AppVersion "0.36.0"
+  #define AppVersion "0.36.1"
 #endif
 #ifndef InstallerAppId
   #define InstallerAppId "{{7BC65B14-5BDF-4C8F-93E1-784B379E622D}"
@@ -41,6 +41,7 @@ Name: "desktopicon"; Description: "创建桌面快捷方式"; Flags: checkedonce
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "使用说明.md"; DestDir: "{app}"; DestName: "使用说明.txt"; Flags: ignoreversion
+Source: "..\..\NOTICE.md"; DestDir: "{app}"; DestName: "项目声明.txt"; Flags: ignoreversion
 Source: "..\.runtime\build-tools\MicrosoftEdgeWebview2Setup.exe"; Flags: dontcopy
 [Icons]
 Name: "{group}\视训工作台"; Filename: "{app}\VisionWorkbench.exe"

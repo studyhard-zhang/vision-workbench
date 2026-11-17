@@ -8,6 +8,7 @@ for name in ['run.py','requirements.txt','RELEASE.md']:
     datas.append((str(root/name),'.'))
 datas.append((str(root/'desktop/THIRD_PARTY_NOTICES.txt'),'.'))
 datas.append((str(root/'desktop/使用说明.md'),'.'))
+datas.append((str(root.parent/'NOTICE.md'),'.'))
 a=Analysis([str(root/'desktop.py')],pathex=[str(root)],binaries=[],datas=datas,
     hiddenimports=['webview.platforms.edgechromium','webview.platforms.winforms','PIL.ImageFont','PIL.PngImagePlugin','PIL.JpegImagePlugin'],
     hookspath=[],hooksconfig={},runtime_hooks=[],excludes=['torch','torchvision','ultralytics','PyQt5','PyQt6','PySide2','PySide6','tkinter'],noarchive=False)

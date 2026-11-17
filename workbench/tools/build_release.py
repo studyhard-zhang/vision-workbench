@@ -19,6 +19,7 @@ def build(destination):
                 files[p.relative_to(root).as_posix()]=p.read_bytes()
     for name in ('run.py','requirements.txt','RELEASE.md'):
         files[name]=(root/name).read_bytes()
+    files['NOTICE.md']=(root.parent/'NOTICE.md').read_bytes()
     checks={name:{'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()} for name,raw in files.items()}
     files['release-manifest.json']=(json.dumps({'format_version':1,'version':VERSION,'schema':SCHEMA,
         'files':checks,'excluded':['var','restored-workspaces','.runtime','.vendor','SSH configuration/keys','business images/weights']},indent=2)+'\n').encode()
