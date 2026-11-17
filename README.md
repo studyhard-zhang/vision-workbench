@@ -6,18 +6,20 @@
 
 面向工业视觉缺陷检测的可视化训练与模型部署工作台，支持图片标注、类别分层划分、数据版本、模型持续迭代、SSH/WSL 训练环境校验及 TensorRT 产线导出。
 
-当前版本 **v0.36.1 / schema16**。Windows 桌面安装包内置控制端 Python，无需另装 Python、Git 或 Node.js。
+当前版本 **v0.36.2 / schema16**。Windows 桌面安装包内置控制端 Python，无需另装 Python、Git 或 Node.js。
 
 ## 普通用户下载安装
 
 1. 打开 [最新版本下载页](https://github.com/studyhard-zhang/vision-workbench/releases/latest)。
-2. 在 Assets 下载 `VisionWorkbench-Setup-0.36.1-x64.exe`，双击运行。
+2. 在 Assets 下载 `VisionWorkbench-Setup-0.36.2-x64.exe`，双击运行。
 3. 首次使用选择“创建新工作区”；已有数据选择“使用已有工作区”，指向包含 `platform.db` 的目录。
 4. 安装后从桌面或开始菜单打开“视训工作台”。
 
 适用 Windows 10 2004+ / Windows 11 x64。安装器检查 WebView2，缺少时通过微软引导程序安装，此步骤需要联网。当前安装包未数字签名，请核对下载来源及发布页的 SHA-256。
 
 工作区默认位于 `%LOCALAPPDATA%\VisionWorkbenchData\var`，独立于程序目录。新工作区不含演示项目、图片、模型或设备连接。升级和卸载保留工作区。
+
+桌面版优先使用 8765 端口；被其他工作区或程序占用时自动选择空闲端口，继续打开选定的工作区。
 
 完整步骤见 [安装与使用](docs/安装与使用.md)。安装控制端后即可管理图片和标注；训练及 GPU 推理需要另外连接已准备好的计算环境，见 [训练环境准备](docs/训练环境准备.md)。
 

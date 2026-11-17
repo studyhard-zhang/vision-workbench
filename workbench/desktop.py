@@ -2,13 +2,13 @@
 import argparse
 import configparser
 import ctypes
+import errno
 import hashlib
 import json
 import logging
 import os
 from pathlib import Path
 import sqlite3
-import socket
 import sys
 import threading
 import urllib.error
@@ -57,19 +57,28 @@ def runtime_info(port):
     except (OSError,ValueError):return None
 
 class Session:
-    def __init__(self,workspace,port):self.workspace=workspace;self.port=port;self.server=None;self.thread=None;self.reused=False
+    def __init__(self,workspace,port):self.workspace=Path(workspace).resolve();self.port=port;self.server=None;self.thread=None;self.reused=False
     def start(self):
         info=runtime_info(self.port)
-        if info:
-            if info.get('product')!='vision-workbench' or Path(info.get('data_dir','')).resolve()!=self.workspace:raise ValueError(f'端口{self.port}属于其他工作区；未连接或启动第二个服务。')
-            if info.get('version')!=VERSION or info.get('schema')!=SCHEMA:raise ValueError('工作台服务版本与客户端不一致。请先退出旧版服务，再打开客户端；数据不会改变。')
+        matching=isinstance(info,dict) and info.get('product')=='vision-workbench' and isinstance(info.get('data_dir'),str) and Path(info['data_dir']).resolve()==self.workspace
+        if matching:
+            if info.get('version')!=VERSION or info.get('schema')!=SCHEMA:
+                raise ValueError(f'此工作区已由其他版本的工作台服务打开，请先退出该工作区的旧版服务再启动客户端。\n工作区：{self.workspace}')
             self.reused=True
         else:
-            with socket.socket() as probe:
-                if probe.connect_ex(('127.0.0.1',self.port))==0:raise ValueError(f'端口{self.port}正在运行旧版本或其他程序；未打开数据库，请先退出对应服务。')
             from app.server import create_server
-            try:self.server=create_server(self.port,self.workspace/'platform.db')
-            except OSError as exc:raise ValueError('工作区或端口已被占用。请先退出原工作台服务，再打开客户端；不会结束未知进程。') from exc
+            preferred=self.port
+            try:
+                try:self.server=create_server(0 if info else preferred,self.workspace/'platform.db')
+                except OSError as exc:
+                    # Binding may race another process, or Windows may reserve the
+                    # preferred port. Workspace-lock errors must never start a second writer.
+                    if info or (exc.errno not in (errno.EADDRINUSE,errno.EACCES) and getattr(exc,'winerror',None) not in (10048,10013)):raise
+                    self.server=create_server(0,self.workspace/'platform.db')
+            except OSError as exc:
+                raise ValueError(f'无法打开所选工作区，请检查是否已有服务使用该目录，以及目录权限。\n工作区：{self.workspace}') from exc
+            self.port=self.server.server_port
+            if self.port!=preferred:logging.info('Preferred desktop port %s unavailable; selected %s for workspace=%s',preferred,self.port,self.workspace)
             self.thread=threading.Thread(target=self.server.serve_forever,name='desktop-workbench',daemon=True);self.thread.start()
         return f'http://127.0.0.1:{self.port}/'
     def close(self):
@@ -95,7 +104,7 @@ def notify(message):
 
 def main():
     parser=argparse.ArgumentParser(description='视训工作台桌面客户端')
-    parser.add_argument('--data-dir',type=Path);parser.add_argument('--profile-dir',type=Path,default=profile_root());parser.add_argument('--port',type=int,default=8765)
+    parser.add_argument('--data-dir',type=Path);parser.add_argument('--profile-dir',type=Path,default=profile_root());parser.add_argument('--port',type=int,default=8765,help='首选本地端口；被其他工作区或程序占用时自动选择空闲端口')
     parser.add_argument('--smoke-report',type=Path,help=argparse.SUPPRESS)
     parser.add_argument('--initialize-workspace',action='store_true',help=argparse.SUPPRESS)
     args=parser.parse_args();profile=args.profile_dir.resolve();profile.mkdir(parents=True,exist_ok=True)
@@ -121,13 +130,13 @@ def main():
         window=webview.create_window('视训工作台 · 桌面版 '+VERSION,url,width=1440,height=980,min_size=(1000,700),confirm_close=not bool(args.smoke_report),text_select=True)
         if args.smoke_report:
             def loaded():
-                info=runtime_info(args.port)
+                info=runtime_info(session.port)
                 if not info or info.get('version')!=VERSION:raise RuntimeError('Desktop page loaded without matching workspace service')
                 args.smoke_report.parent.mkdir(parents=True,exist_ok=True)
                 args.smoke_report.write_text(json.dumps({'version':VERSION,'workspace':str(workspace),'runtime':info,'reused_service':session.reused,'window_loaded':True,'url':window.get_current_url()},ensure_ascii=False,indent=2),encoding='utf-8')
                 threading.Timer(2,window.destroy).start()
             window.events.loaded+=loaded
-        logging.info('Desktop opened; workspace=%s port=%s reused=%s',workspace,args.port,session.reused)
+        logging.info('Desktop opened; workspace=%s port=%s reused=%s',workspace,session.port,session.reused)
         webview.start(gui='edgechromium',private_mode=False,storage_path=str(profile/'webview'),localization={'global.quitConfirmation':'退出客户端？请先保存当前编辑。关闭窗口不会中止远端GPU任务；下次打开可继续核对进度。','global.ok':'退出','global.cancel':'返回工作台','global.saveFile':'保存文件','global.openFile':'选择文件','global.allFiles':'所有文件'})
         return 0
     except Exception as exc:

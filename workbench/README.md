@@ -2,7 +2,7 @@
 
 > 本项目仅用于学习和二次开发，基于 Ultralytics YOLO26 模型进行训练。
 
-当前版本 v0.36.1 / schema16。详见 [项目声明](../NOTICE.md)。
+当前版本 v0.36.2 / schema16。详见 [项目声明](../NOTICE.md)。
 
 普通用户请从 [GitHub Releases](https://github.com/studyhard-zhang/vision-workbench/releases/latest) 下载安装包。
 
